@@ -1,56 +1,77 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
-export function UploadImagem({
-    className ='',
+export default function UploadImagem({
+    className = '',
     setImagem,
     imagemPreview,
-    imagemPreviewClassName = ''
+    imagemPreviewClassName = '',
+    aoSetarAReferencia
 }) {
-    const referenciaInput = useRef (null);
+    const referenciaInput = useRef(null);
+
+    useEffect(() => {
+        if (!aoSetarAReferencia) {
+            return;
+        }
+
+        aoSetarAReferencia(referenciaInput?.current);
+    }, [referenciaInput?.current]);
 
     const abrirSeletorArquivos = () => {
         referenciaInput?.current?.click();
     }
 
-    const aoAlterarImagem =() =>{
-
-        if (!referenciaInput?.current?.files?.lenght){
+    const aoAleterarImagem = () => {
+        if (!referenciaInput?.current?.files?.length) {
             return;
         }
 
         const arquivo = referenciaInput?.current?.files[0];
+        obterUrlDaImagemEAtualizarEstado(arquivo);
+    }
+
+    const obterUrlDaImagemEAtualizarEstado = (arquivo) => {
         const fileReader = new FileReader();
         fileReader.readAsDataURL(arquivo);
-        fileReader.onloadend = () =>{ 
+        fileReader.onloadend = () => {
             setImagem({
                 preview: fileReader.result,
                 arquivo
-            })
+            });
         }
     }
 
-    return(
-        <div className= {`uploadImagemContainer ${className}`} onClick = {abrirSeletorArquivos}>
-            <button> Abrir seletor de arquivos </button>
-                {imagemPreview && (
-                    <div className="imagemPreviewContainer">
-                        <img 
-                            src= {imagemPreview}
-                            alt='Imagem preview'
-                            className={imagemPreviewClassName}
-                        />
+    const aoSoltarAImagem = (e) => {
+        e.preventDefault();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const arquivo = e.dataTransfer.files[0];
+            obterUrlDaImagemEAtualizarEstado(arquivo);
+        }
+    }
 
-                    </div>
-                )}
+    return (
+        <div className={`uploadImagemContainer ${className}`}
+            onClick={abrirSeletorArquivos}
+            onDragOver={e => e.preventDefault()}
+            onDrop={aoSoltarAImagem}
+        >
+            {imagemPreview && (
+                <div className="imagemPreviewContainer">
+                    <img 
+                        src={imagemPreview}
+                        alt='imagem preview'
+                        className={imagemPreviewClassName}
+                    />
+                </div>
+            )}
 
-            <input 
-                type = 'file'
-                className = 'oculto' 
-                accept ="image/*"
-                ref = {referenciaInput}
-                onChange ={aoAlterarImagem}
-                />
-                
+            <input
+                type='file'
+                className='oculto'
+                accept="image/*"
+                ref={referenciaInput}
+                onChange={aoAleterarImagem}
+            />
         </div>
     );
 }

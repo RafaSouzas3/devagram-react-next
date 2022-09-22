@@ -8,24 +8,26 @@
     color: $corPrimaria;
     border: 1px solid $corPrimaria;
 }
+
 .btn {
-    width : 100% ;
-    border : none;
-    border-radius: 5px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
     cursor: pointer;
 
-    &.primaria{
+    &.primaria {
         @include botaoPrimario;
 
         &:hover {
             @include botaoInvertido;
         }
     }
-    &.invertido{
+
+    &.invertido {
         @include botaoInvertido;
 
         &:hover {
-           @include botaoPrimario;
+            @include botaoPrimario;
         }
     }
 
