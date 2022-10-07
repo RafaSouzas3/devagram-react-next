@@ -1,102 +1,100 @@
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import InputPublico from "../inputPublico";
 import Botao from "../botao";
-import {validarEmail, validarSenha,} from "../../utils/validadores"
-import UsuarioService from "../../serveces/UsuarioService";
+import { validarEmail, validarSenha } from "../../utils/validadores";
+import UsuarioService from "../../services/UsuarioService";
 
 import imagemEnvelope from "../../public/imagens/envelope.svg";
 import imagemChave from "../../public/imagens/chave.svg";
 import imagemLogo from "../../public/imagens/logo.svg";
-import Image from "next/image";
-import Link from "next/link";
 
 const usuarioService = new UsuarioService();
 
-export default function Login () {
-    const [email,setEmail] = useState("");
-    const [senha,setSenha] = useState("");
-    const [estaSubmetendo,setEstaSubmetendo]= useState(false);
+export default function Login({ aposAutenticacao }) {
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+    const [estaSubmetendo, setEstaSubmetendo] = useState(false);
 
-    const validarFormulario = () =>{
-        return(
+    const validarFormulario = () => {
+        return (
             validarEmail(email)
-            && validarSenha (senha)
+            && validarSenha(senha)
         );
     }
 
-    const aoSubmeter = async(e)=>{
+    const aoSubmeter = async (e) => {
         e.preventDefault();
-        if(!validarFormulario()){
+        if (!validarFormulario()) {
             return;
         }
+
         setEstaSubmetendo(true);
 
-        try{
+        try {
             await usuarioService.login({
-                login: 'email',
+                login: email,
                 senha
-
             });
 
-        }catch(error){
-            alert (
-                "Erro ao realizar o login." + error?.response?.data?.erro
-                );
-
+            if (aposAutenticacao) {
+                aposAutenticacao();
+            }
+        } catch (error) {
+            alert(
+                "Erro ao realizar o login. " + error?.response?.data?.erro
+            );
         }
 
         setEstaSubmetendo(false);
-    }
+    } 
 
     return (
-        <section className= {'paginaLogin paginaPublica'}>
+        <section className={`paginaLogin paginaPublica`}>
             <div className="logoContainer">
-                <Image 
+                <Image
                     src={imagemLogo}
-                    alt= "logotipo"
+                    alt="logotipo"
                     layout="fill"
                     className="logo"
                 />
-
             </div>
 
             <div className="conteudoPaginaPublica">
                 <form onSubmit={aoSubmeter}>
                     <InputPublico
                         imagem={imagemEnvelope}
-                        texto= "E-mail"
+                        texto="E-mail"
                         tipo="email"
-                        aoAlterarValor={e =>setEmail(e.target.value)}
-                        valor= {email}
-                        mensagemValidacao= "O endereço informado é invalido"
+                        aoAlterarValor={e => setEmail(e.target.value)}
+                        valor={email}
+                        mensagemValidacao="O endereço informado é inválido"
                         exibirMensagemValidacao={email && !validarEmail(email)}
                     />
-                      <InputPublico
+
+                    <InputPublico
                         imagem={imagemChave}
-                        texto= "Senha"
+                        texto="Senha"
                         tipo="password"
-                        aoAlterarValor={e=> setSenha(e.target.value)}
+                        aoAlterarValor={e => setSenha(e.target.value)}
                         valor={senha}
-                        mensagemValidacao= "Precisa ter pelo menos 3 caracteres"
+                        mensagemValidacao="Precisa ter pelo menos 3 caracteres"
                         exibirMensagemValidacao={senha && !validarSenha(senha)}
                     />
 
                     <Botao
-                    texto="Login"
-                    tipo="submit"
-                    desabilitado= {!validarFormulario() || estaSubmetendo}
-                    
+                        texto="Login"
+                        tipo="submit"
+                        desabilitado={!validarFormulario() || estaSubmetendo}
                     />
-
                 </form>
-
+                
                 <div className="rodapePaginaPublica">
                     <p>Não possui uma conta?</p>
                     <Link href="/cadastro">Faça seu cadastro agora!</Link>
-
                 </div>
             </div>
-
         </section>
-    )
+    );
 }
